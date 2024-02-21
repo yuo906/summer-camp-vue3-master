@@ -24,64 +24,69 @@
           <button
             type="button"
             class="btn btn-outline-primary"
+            @click="status = !status"
           >
             切換大頭貼解析度
           </button>
           現在圖片解析度：
-          <span>清晰</span>
+          <span v-if="status">清晰</span>
+          <span v-else>模糊</span>
         </div>
         <div class="row">
-          <div class="col-md-4 mb-3">
+          <div class="col-md-4 mb-3" v-for="item in data" :key="item.name">
             <div class="card h-100">
               <div class="position-absolute" style="top: 20px; right: 20px">
                 <button
                   type="button"
                   class="btn btn-outline-danger rounded-pill"
+                  @click="item.favorite = !item.favorite"
                 >
-                  <i class="bi bi-heart fs-5"></i>
+                  <i v-if="!item.favorite" class="bi bi-heart fs-5"></i>
+                  <i v-else class="bi bi-heart-fill fs-5"></i>
                 </button>
               </div>
               <img
-                src="https://randomuser.me/api/portraits/men/24.jpg"
+                :src="status ? item.picture.large : item.picture.thumbnail"
                 class="card-img-top"
               />
               <div class="card-body">
                 <h5 class="card-title">
-                  Monsieur Jérôme Clement( <span>👨</span> )
+                  {{item.name.title}} {{item.name.first}} {{item.name.last}}(
+                  <span v-if="item.gender === 'male'">👨</span>
+                  <span v-if="item.gender === 'female'">👩</span> )
                 </h5>
                 <p class="card-text">
                   Email：<a href="mailto:jerome.clement@example.com"
-                    >jerome.clement@example.com</a
+                    >{{item.email}}</a
                   >
                 </p>
                 <p class="card-text">
-                  Phone: <a href="tel:077 857 10 09">077 857 10 09</a>
+                  Phone: <a href="tel:077 857 10 09">{{item.phone}}</a>
                 </p>
                 <p class="card-text">
-                  Cell: <a href="tel:075 491 99 85">075 491 99 85</a>
+                  Cell: <a href="tel:075 491 99 85">{{item.cell}}</a>
                 </p>
-                <p class="card-text">City: Châtillon (Ju)</p>
-                <p class="card-text">State: Graubünden</p>
-                <p class="card-text">Country: Switzerland</p>
-                <p class="card-text">Postcode: 6560</p>
+                <p class="card-text">City: {{item.location.city}}</p>
+                <p class="card-text">State: {{item.location.state}}</p>
+                <p class="card-text">Country: {{item.location.country}}</p>
+                <p class="card-text">Postcode: {{item.location.postcode}}</p>
                 <p>
                   Address：<a
-                    href="https://www.google.com.tw/maps/search/Châtillon (Ju)Graubünden"
+                    :href="`https://www.google.com.tw/maps/search/${item.location.city} ${item.location.state}`"
                     target="_blank"
-                    >Châtillon (Ju) Graubünden Switzerland 6560</a
-                  >
+                    >{{item.location.city}} {{item.location.state}}
+                    {{item.location.country}} {{item.location.postcode}}
+                  </a>
                 </p>
                 <p class="card-text">
-                  description: Bombay, Calcutta, Madras, New Delhi
+                  description: {{item.location.timezone.description}}
+                </p>
+                <p class="card-text">
+                  <small class="text-muted">dob：{{item.dob.date}}</small>
                 </p>
                 <p class="card-text">
                   <small class="text-muted"
-                    >dob：1965-03-08T06:47:08.901Z</small
-                  >
-                </p>
-                <p class="card-text">
-                  <small class="text-muted"
-                    >registered：2016-03-08T06:04:55.159Z</small
+                    >registered：{{item.registered.date}}</small
                   >
                 </p>
                 <iframe
@@ -91,7 +96,7 @@
                   scrolling="no"
                   marginheight="0"
                   marginwidth="0"
-                  src="https://maps.google.com.tw/maps?f=q&amp;hl=zh-TW&amp;geocode=&amp;q=-50.7880,-14.1043&amp;z=10&amp;output=embed"
+                  :src="`https://maps.google.com.tw/maps?f=q&amp;hl=zh-TW&amp;geocode=&amp;q=${item.location.coordinates.latitude},${item.location.coordinates.longitude}&amp;z=10&amp;output=embed`"
                 ></iframe>
               </div>
             </div>
@@ -104,10 +109,30 @@
       integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8"
       crossorigin="anonymous"
     ></script>
-    <script src="https://unpkg.com/vue@next"></script>
-    <script src="data.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- 選項式 -->
     <script>
-      console.log(results);
+      Vue.createApp({
+        data() {
+          return {
+            status: true,
+            data: [],
+          };
+        },
+        mounted() {
+          this.getData();
+        },
+        methods: {
+          getData() {
+            fetch("https://randomuser.me/api/?results=8")
+              .then((result) => result.json())
+              .then((result) => {
+                this.data = result.results;
+                console.log(this.data);
+              });
+          },
+        },
+      }).mount("#app");
     </script>
   </body>
 </html>
